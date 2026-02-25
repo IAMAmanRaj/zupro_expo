@@ -4,8 +4,11 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  Easing,
   FlatList,
   Linking,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -19,7 +22,7 @@ import JobCard, { type Job } from "../components/Home/JobCard";
 import { HERO_ITEMS, INITIAL_JOBS } from "../constants/home/constants";
 
 const HERO_HEIGHT = 360;
-const AUTO_SHIFT_MS = 6500;
+const AUTO_SHIFT_MS = 4500;
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<number>);
 const REFRESH_DELAY_MS = 900;
 
@@ -34,6 +37,9 @@ export default function HomeScreen() {
   const [isHoldingHero, setIsHoldingHero] = useState(false);
   const carouselRef = useRef<FlatList<number>>(null);
   const activeIndexRef = useRef(0);
+  const currentOffsetRef = useRef(0);
+  const isAutoAnimatingRef = useRef(false);
+  const autoScrollValue = useRef(new Animated.Value(0)).current;
   const scrollX = useRef(new Animated.Value(0)).current;
   const { width } = useWindowDimensions();
 
@@ -75,6 +81,44 @@ export default function HomeScreen() {
     // Static input handling only for now.
   };
 
+  const animateToIndex = (index: number) => {
+    const targetOffset = index * width;
+    isAutoAnimatingRef.current = true;
+    autoScrollValue.stopAnimation();
+    autoScrollValue.setValue(currentOffsetRef.current);
+
+    Animated.timing(autoScrollValue, {
+      toValue: targetOffset,
+      duration: 1000,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) {
+        activeIndexRef.current = index;
+        currentOffsetRef.current = targetOffset;
+      }
+      isAutoAnimatingRef.current = false;
+    });
+  };
+
+  useEffect(() => {
+    const listenerId = autoScrollValue.addListener(({ value }) => {
+      if (!isAutoAnimatingRef.current) {
+        return;
+      }
+
+      currentOffsetRef.current = value;
+      carouselRef.current?.scrollToOffset({
+        animated: false,
+        offset: value,
+      });
+    });
+
+    return () => {
+      autoScrollValue.removeListener(listenerId);
+    };
+  }, [autoScrollValue]);
+
   useEffect(() => {
     if (isHoldingHero || HERO_ITEMS.length <= 1) {
       return;
@@ -82,11 +126,7 @@ export default function HomeScreen() {
 
     const timer = setInterval(() => {
       const nextIndex = (activeIndexRef.current + 1) % HERO_ITEMS.length;
-      carouselRef.current?.scrollToOffset({
-        animated: true,
-        offset: nextIndex * width,
-      });
-      activeIndexRef.current = nextIndex;
+      animateToIndex(nextIndex);
     }, AUTO_SHIFT_MS);
 
     return () => clearInterval(timer);
@@ -117,17 +157,29 @@ export default function HomeScreen() {
               const nextIndex = Math.round(
                 event.nativeEvent.contentOffset.x / width,
               );
+              currentOffsetRef.current = event.nativeEvent.contentOffset.x;
               activeIndexRef.current = nextIndex;
             }}
             onScroll={Animated.event(
               [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: true },
+              {
+                useNativeDriver: true,
+                listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+                  if (!isAutoAnimatingRef.current) {
+                    currentOffsetRef.current = event.nativeEvent.contentOffset.x;
+                  }
+                },
+              },
             )}
             pagingEnabled
             ref={carouselRef}
             renderItem={({ item }) => (
               <Pressable
-                onPressIn={() => setIsHoldingHero(true)}
+                onPressIn={() => {
+                  isAutoAnimatingRef.current = false;
+                  autoScrollValue.stopAnimation();
+                  setIsHoldingHero(true);
+                }}
                 onPressOut={() => setIsHoldingHero(false)}
                 style={{ width }}
               >
