@@ -188,10 +188,13 @@ export default function HomeScreen() {
                   style={{ height: HERO_HEIGHT, width }}
                 >
                   <Image
-                    contentFit="contain"
-                    source={item}
-                    style={{ height: HERO_HEIGHT, width }}
-                  />
+  source={item}
+  contentFit="contain"
+  transition={0}          
+  cachePolicy="memory-disk"
+  priority="high"
+  style={{ height: HERO_HEIGHT, width }}
+/>
                 </View>
               </Pressable>
             )}
