@@ -5,18 +5,32 @@ import HomeScreen from "../home/HomeScreen";
 import SplashScreen from "../splash/SplashScreen";
 import { preloadHeroImages } from "../utils/preLoadImages";
 
+const MIN_SPLASH_DURATION_MS = 2200;
+
 export default function AppBootstrap() {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const [isSplashExiting, setIsSplashExiting] = useState(false);
 
   useEffect(() => {
-    void preloadHeroImages(HERO_ITEMS);
+    let isCancelled = false;
 
-    const timer = setTimeout(() => {
-      setIsSplashExiting(true);
-    }, 2200);
+    const startBootstrap = async () => {
+      const minimumSplashTimer = new Promise((resolve) => {
+        setTimeout(resolve, MIN_SPLASH_DURATION_MS);
+      });
 
-    return () => clearTimeout(timer);
+      await Promise.all([minimumSplashTimer, preloadHeroImages(HERO_ITEMS)]);
+
+      if (!isCancelled) {
+        setIsSplashExiting(true);
+      }
+    };
+
+    void startBootstrap();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   return (
