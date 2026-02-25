@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -30,14 +30,14 @@ export default function HomeScreen() {
   const scrollX = useRef(new Animated.Value(0)).current;
   const { width } = useWindowDimensions();
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);
     }, 1000);
-  }, []);
+  };
 
-  const openLocationMap = useCallback(async (mapUrl: string) => {
+  const openLocationMap = async (mapUrl: string) => {
     const canOpen = await Linking.canOpenURL(mapUrl);
 
     if (!canOpen) {
@@ -46,19 +46,19 @@ export default function HomeScreen() {
     }
 
     await Linking.openURL(mapUrl);
-  }, []);
+  };
 
-  const handleNotInterested = useCallback((jobId: string) => {
+  const handleNotInterested = (jobId: string) => {
     setJobs((previousJobs) => previousJobs.filter((job) => job.id !== jobId));
-  }, []);
+  };
 
-  const handleApply = useCallback((jobTitle: string) => {
+  const handleApply = (jobTitle: string) => {
     Alert.alert("Applied", `Request sent for ${jobTitle}.`);
-  }, []);
+  };
 
-  const handleSearchSubmit = useCallback((_query: string) => {
+  const handleSearchSubmit = (_query: string) => {
     // Static input handling only for now.
-  }, []);
+  };
 
   useEffect(() => {
     if (isHoldingHero || HERO_ITEMS.length <= 1) {

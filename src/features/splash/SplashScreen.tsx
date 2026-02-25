@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -13,7 +13,6 @@ import { scheduleOnRN } from "react-native-worklets";
 import { SPLASH_IMAGE } from "../constants/splash/constants";
 
 const ANIMATION = {
-  badgeTopOffset: 8,
   exitTranslateX: -420,
   exitDurationMs: 620,
   exitFadeTo: 0,
@@ -31,7 +30,6 @@ export default function SplashScreen({
   isExiting = false,
   onExitComplete,
 }: SplashScreenProps) {
-  const insets = useSafeAreaInsets();
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
 
