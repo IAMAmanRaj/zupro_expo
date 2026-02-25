@@ -13,7 +13,7 @@ export default function Header({
   onOpenMap,
 }: HeaderProps) {
   return (
-    <View className="px-5 pb-4 pt-4">
+    <View className="px-5 pb-4">
       <View className="mb-4 flex-row items-start justify-between">
         <View>
           <Text className="text-3xl font-bold tracking-tight text-zinc-900">

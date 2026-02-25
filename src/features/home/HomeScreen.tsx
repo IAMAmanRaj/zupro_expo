@@ -1,41 +1,13 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Alert, Linking, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../components/Header";
 import JobCard, { type Job } from "../components/JobCard";
+import { INITIAL_JOBS } from "../constants/jobs";
 
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
-
-  const jobs = useMemo<Job[]>(
-    () => [
-      {
-        id: "1",
-        title: "Tile Mason",
-        location: "Andheri East, Mumbai",
-        startDate: "Tomorrow, 7:00 AM",
-        payLabel: "₹1,200 per day",
-        onApply: () => Alert.alert("Applied", "Request sent to employer."),
-      },
-      {
-        id: "2",
-        title: "Warehouse Helper",
-        location: "Bhiwandi, Thane",
-        startDate: "Today, 2:30 PM",
-        payLabel: "₹900 per shift",
-        onApply: () => Alert.alert("Applied", "Request sent to employer."),
-      },
-      {
-        id: "3",
-        title: "House Painter",
-        location: "Whitefield, Bengaluru",
-        startDate: "Friday, 8:00 AM",
-        payLabel: "₹1,400 per day",
-        onApply: () => Alert.alert("Applied", "Request sent to employer."),
-      },
-    ],
-    [],
-  );
+  const [jobs, setJobs] = useState<Job[]>(INITIAL_JOBS);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -54,6 +26,25 @@ export default function HomeScreen() {
     }
 
     await Linking.openURL(url);
+  }, []);
+
+  const openLocationMap = useCallback(async (mapUrl: string) => {
+    const canOpen = await Linking.canOpenURL(mapUrl);
+
+    if (!canOpen) {
+      Alert.alert("Unable to open maps");
+      return;
+    }
+
+    await Linking.openURL(mapUrl);
+  }, []);
+
+  const handleNotInterested = useCallback((jobId: string) => {
+    setJobs((previousJobs) => previousJobs.filter((job) => job.id !== jobId));
+  }, []);
+
+  const handleApply = useCallback((jobTitle: string) => {
+    Alert.alert("Applied", `Request sent for ${jobTitle}.`);
   }, []);
 
   return (
@@ -78,8 +69,25 @@ export default function HomeScreen() {
           </Text>
 
           {jobs.map((job) => (
-            <JobCard job={job} key={job.id} />
+            <JobCard
+              job={job}
+              key={job.id}
+              onApply={() => handleApply(job.title)}
+              onNotInterested={() => handleNotInterested(job.id)}
+              onOpenLocation={() => openLocationMap(job.mapUrl)}
+            />
           ))}
+
+          {jobs.length === 0 ? (
+            <View className="mt-8 rounded-2xl border border-zinc-200 bg-white p-4">
+              <Text className="text-base font-medium text-zinc-800">
+                No more jobs in this feed.
+              </Text>
+              <Text className="mt-1 text-sm text-zinc-600">
+                Pull to refresh to check for new postings.
+              </Text>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>
