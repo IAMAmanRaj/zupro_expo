@@ -68,7 +68,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
       onTouchEnd={card.pressOut}
       onTouchCancel={card.pressOut}
     >
-      <View className="rounded-3xl border bg-blue-100 border-gray-700 overflow-hidden">
+      <View className="rounded-3xl border bg-white border-gray-700 overflow-hidden">
 
         {/* ── Header ───────────────────────────────────── */}
         <View className="px-5 pt-5 pb-4">
@@ -81,21 +81,38 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
             {job.title}
           </Text>
 
-          {/* Location badge: capped at 80% width, truncates cleanly */}
-          <View className="mt-3 flex-row items-center self-start max-w-[80%] rounded-full bg-blue-50 border border-blue-400 px-3 py-1.5">
-            <Ionicons color="#2563eb" name="location-sharp" size={14} />
-            <Text
-              className="ml-1.5 text-sm font-semibold text-blue-700 flex-shrink"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {job.location}
-            </Text>
+          <View className="mt-3 flex-row items-center justify-between gap-2">
+            {/* Location badge: capped width, truncates cleanly */}
+            <View className="flex-row items-center max-w-[55%] rounded-full bg-blue-50 border border-blue-400 px-3 py-1.5">
+              <Ionicons color="#2563eb" name="location-sharp" size={14} />
+              <Text
+                className="ml-1.5 text-md font-semibold text-blue-700 flex-shrink"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {job.location}
+              </Text>
+            </View>
+
+            {/* Map button */}
+            <Animated.View style={{ transform: [{ scale: mapBtn.anim }] }}>
+              <Pressable
+                onPressIn={mapBtn.pressIn}
+                onPressOut={mapBtn.pressOut}
+                onPress={onOpenLocation}
+                accessibilityRole="button"
+                accessibilityLabel={`See ${job.location} on map`}
+                className="h-11 w-[80px] flex-row items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-white"
+              >
+                <Ionicons color="#1d4ed8" name="eye-outline" size={20} />
+                <Text className="text-md font-semibold text-black">View</Text>
+              </Pressable>
+            </Animated.View>
           </View>
         </View>
 
         {/* ── Divider ──────────────────────────────────── */}
-        <View className="h-px bg-gray-100 mx-5" />
+        <View className="h-px bg-gray-300 mx-5" />
 
         {/* ── Info chips ───────────────────────────────── */}
         <View className="flex-row gap-3 px-5 pt-4 pb-4">
@@ -104,7 +121,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
           <View className="flex-1 rounded-2xl border border-gray-100 bg-gray-50 px-3 py-3">
             <View className="flex-row items-center gap-1.5">
               <MaterialIcons color="#9ca3af" name="calendar-month" size={14} />
-              <Text className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+              <Text className="text-sm font-semibold text-gray-800 uppercase tracking-wide">
                 Joining
               </Text>
             </View>
@@ -121,7 +138,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
           <View className="flex-1 rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-3">
             <View className="flex-row items-center gap-1.5">
               <Ionicons color="#059669" name="wallet-outline" size={14} />
-              <Text className="text-xs font-semibold text-emerald-500 uppercase tracking-wide">
+              <Text className="text-sm font-semibold text-emerald-500 uppercase tracking-wide">
                 {pay.prefix || "Pay"}
               </Text>
             </View>
@@ -138,25 +155,10 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
         {/* ── Actions ──────────────────────────────────── */}
         <View className="gap-3 px-5 pb-5">
 
-          {/* Map button */}
-          <Animated.View style={{ transform: [{ scale: mapBtn.anim }] }}>
-            <Pressable
-              onPressIn={mapBtn.pressIn}
-              onPressOut={mapBtn.pressOut}
-              onPress={onOpenLocation}
-              accessibilityRole="button"
-              accessibilityLabel={`See ${job.location} on map`}
-              className="h-11 flex-row items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50"
-            >
-              <Ionicons color="#1d4ed8" name="map-outline" size={17} />
-              <Text className="text-sm font-semibold text-blue-700">View on map</Text>
-            </Pressable>
-          </Animated.View>
-
           {/* Skip + Apply row */}
           <View className="flex-row gap-3">
 
-            {/* Skip — flex:1 (narrower) */}
+            {/* Skip */}
             <Animated.View style={{ flex: 1, transform: [{ scale: skipBtn.anim }] }}>
               <Pressable
                 onPressIn={skipBtn.pressIn}
@@ -164,15 +166,15 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
                 onPress={onNotInterested}
                 accessibilityRole="button"
                 accessibilityLabel={`Not interested in ${job.title}`}
-                className="h-12 flex-row items-center justify-center gap-1.5 rounded-2xl border border-gray-200 bg-white"
+                className="h-12 flex-row items-center justify-center gap-1.5 rounded-2xl border border-gray-500 bg-gray-100"
               >
-                <Ionicons color="#9ca3af" name="close-circle-outline" size={18} />
-                <Text className="text-lg font-semibold text-gray-500">Skip</Text>
+                <Ionicons color="#000000" name="close-circle-outline" size={18} />
+                <Text className="text-lg font-semibold text-black">Skip</Text>
               </Pressable>
             </Animated.View>
 
-            {/* Apply — flex:2 (dominant) */}
-            <Animated.View style={{ flex: 2, transform: [{ scale: applyBtn.anim }] }}>
+            {/* Apply */}
+            <Animated.View style={{ flex: 1, transform: [{ scale: applyBtn.anim }] }}>
               <Pressable
                 onPressIn={applyBtn.pressIn}
                 onPressOut={applyBtn.pressOut}
@@ -182,7 +184,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
                 className="h-12 flex-row items-center justify-center gap-2 rounded-2xl bg-blue-600"
               >
                 <Ionicons color="#ffffff" name="send" size={16} />
-                <Text className="text-lg font-bold text-white">Apply now</Text>
+                <Text className="text-lg font-bold text-white">Apply</Text>
               </Pressable>
             </Animated.View>
           </View>
