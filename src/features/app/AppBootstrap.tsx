@@ -3,18 +3,24 @@ import HomeScreen from "../home/HomeScreen";
 import SplashScreen from "../splash/SplashScreen";
 
 export default function AppBootstrap() {
-  const [isAppReady, setIsAppReady] = useState(false);
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
+  const [isSplashExiting, setIsSplashExiting] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsAppReady(true);
-    }, 1200);
+      setIsSplashExiting(true);
+    }, 2200);
 
     return () => clearTimeout(timer);
   }, []);
 
-  if (!isAppReady) {
-    return <SplashScreen />;
+  if (isSplashVisible) {
+    return (
+      <SplashScreen
+        isExiting={isSplashExiting}
+        onExitComplete={() => setIsSplashVisible(false)}
+      />
+    );
   }
 
   return <HomeScreen />;
