@@ -4,10 +4,15 @@ import { Pressable, Text, TextInput, View } from "react-native";
 
 type HeaderProps = {
   defaultLocation: string;
+  onRefresh: () => void;
   onSearchSubmit: (query: string) => void;
 };
 
-export default function Header({ defaultLocation, onSearchSubmit }: HeaderProps) {
+export default function Header({
+  defaultLocation,
+  onRefresh,
+  onSearchSubmit,
+}: HeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState(defaultLocation);
 
@@ -41,15 +46,25 @@ export default function Header({ defaultLocation, onSearchSubmit }: HeaderProps)
       ) : (
         <View className="flex-row items-center justify-between">
           <Text className="text-xl font-semibold text-zinc-900">Jobs near you</Text>
-          <Pressable
-            accessibilityLabel="Open search"
-            accessibilityRole="button"
-            className="h-10 flex-row items-center rounded-xl border border-zinc-300 bg-white px-3"
-            onPress={() => setIsSearchExpanded(true)}
-          >
-            <Ionicons color="#27272a" name="search-outline" size={16} />
-            <Text className="ml-2 text-sm font-semibold text-zinc-800">Search</Text>
-          </Pressable>
+          <View className="flex-row items-center">
+            <Pressable
+              accessibilityLabel="Refresh jobs"
+              accessibilityRole="button"
+              className="mr-2 h-10 w-10 items-center justify-center rounded-xl border border-zinc-300 bg-white"
+              onPress={onRefresh}
+            >
+              <Ionicons color="#27272a" name="refresh-outline" size={16} />
+            </Pressable>
+            <Pressable
+              accessibilityLabel="Open search"
+              accessibilityRole="button"
+              className="h-10 flex-row items-center rounded-xl border border-zinc-300 bg-white px-3"
+              onPress={() => setIsSearchExpanded(true)}
+            >
+              <Ionicons color="#27272a" name="search-outline" size={16} />
+              <Text className="ml-2 text-sm font-semibold text-zinc-800">Search</Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </View>

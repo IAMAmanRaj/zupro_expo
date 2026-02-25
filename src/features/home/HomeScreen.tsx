@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   FlatList,
@@ -20,10 +21,16 @@ import { HERO_ITEMS, INITIAL_JOBS } from "../constants/home/constants";
 const HERO_HEIGHT = 360;
 const AUTO_SHIFT_MS = 6500;
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<number>);
+const REFRESH_DELAY_MS = 900;
+
+function buildJobsFeed(): Job[] {
+  return INITIAL_JOBS.map((job) => ({ ...job }));
+}
 
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
-  const [jobs, setJobs] = useState<Job[]>(INITIAL_JOBS);
+  const [isFeedReloading, setIsFeedReloading] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>(() => buildJobsFeed());
   const [isHoldingHero, setIsHoldingHero] = useState(false);
   const carouselRef = useRef<FlatList<number>>(null);
   const activeIndexRef = useRef(0);
@@ -31,10 +38,18 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
 
   const handleRefresh = () => {
+    if (refreshing) {
+      return;
+    }
+
     setRefreshing(true);
+    setIsFeedReloading(true);
     setTimeout(() => {
+      // Refresh always reloads from source and brings back previously hidden jobs.
+      setJobs(buildJobsFeed());
+      setIsFeedReloading(false);
       setRefreshing(false);
-    }, 1000);
+    }, REFRESH_DELAY_MS);
   };
 
   const openLocationMap = async (mapUrl: string) => {
@@ -162,29 +177,44 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <Header defaultLocation="Mumbai, Maharashtra" onSearchSubmit={handleSearchSubmit} />
+        <Header
+          defaultLocation="Mumbai, Maharashtra"
+          onRefresh={handleRefresh}
+          onSearchSubmit={handleSearchSubmit}
+        />
 
         <View className="px-5">
-          {jobs.map((job) => (
-            <JobCard
-              job={job}
-              key={job.id}
-              onApply={() => handleApply(job.title)}
-              onNotInterested={() => handleNotInterested(job.id)}
-              onOpenLocation={() => openLocationMap(job.mapUrl)}
-            />
-          ))}
-
-          {jobs.length === 0 ? (
-            <View className="mt-8 rounded-2xl border border-zinc-200 bg-white p-4">
-              <Text className="text-base font-medium text-zinc-800">
-                No more jobs in this feed.
-              </Text>
-              <Text className="mt-1 text-sm text-zinc-600">
-                Pull to refresh to check for new postings.
+          {isFeedReloading ? (
+            <View className="mt-6 items-center rounded-2xl border border-zinc-200 bg-white px-4 py-8">
+              <ActivityIndicator color="#2563eb" size="small" />
+              <Text className="mt-3 text-sm font-medium text-zinc-600">
+                Refreshing jobs...
               </Text>
             </View>
-          ) : null}
+          ) : (
+            <>
+              {jobs.map((job) => (
+                <JobCard
+                  job={job}
+                  key={job.id}
+                  onApply={() => handleApply(job.title)}
+                  onNotInterested={() => handleNotInterested(job.id)}
+                  onOpenLocation={() => openLocationMap(job.mapUrl)}
+                />
+              ))}
+
+              {jobs.length === 0 ? (
+                <View className="mt-8 rounded-2xl border border-zinc-200 bg-white p-4">
+                  <Text className="text-base font-medium text-zinc-800">
+                    No more jobs in this feed.
+                  </Text>
+                  <Text className="mt-1 text-sm text-zinc-600">
+                    Pull to refresh to check for new postings.
+                  </Text>
+                </View>
+              ) : null}
+            </>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
