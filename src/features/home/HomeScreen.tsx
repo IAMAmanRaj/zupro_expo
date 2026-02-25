@@ -17,9 +17,9 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from "../components/Home/Header";
-import JobCard, { type Job } from "../components/Home/JobCard";
-import { HERO_ITEMS, INITIAL_JOBS } from "../constants/home/constants";
+import Header from "./components/Header";
+import JobCard, { type Job } from "./components/JobCard";
+import { HERO_ITEMS, INITIAL_JOBS } from "./constants";
 
 const HERO_HEIGHT = 360;
 const AUTO_SHIFT_MS = 4500;

@@ -4,7 +4,7 @@ export const HERO_ITEMS = [
   require("../../../../assets/images/Home/hero_gallery/third.png"),
 ];
 
-import { type Job } from "../../components/Home/JobCard";
+import { type Job } from "./components/JobCard";
 
 export const INITIAL_JOBS: Job[] = [
   {
