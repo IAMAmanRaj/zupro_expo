@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Alert,
   FlatList,
   Linking,
@@ -16,21 +17,23 @@ import Header from "../components/Header";
 import JobCard, { type Job } from "../components/JobCard";
 import { INITIAL_JOBS } from "../constants/jobs";
 
-const HERO_IMAGES = [
-  require("../../../assets/images/Home/hero_gallery/asset_1.png"),
-  require("../../../assets/images/Home/hero_gallery/asset_2.png"),
-  require("../../../assets/images/Home/hero_gallery/asset_3.png"),
+const HERO_ITEMS = [
+  require("../../../assets/images/Home/hero_gallery/first.png"),
+  require("../../../assets/images/Home/hero_gallery/second.png"),
+  require("../../../assets/images/Home/hero_gallery/third.png"),
 ];
 
-const HERO_AUTOPLAY_INTERVAL_MS = 5000;
-const HERO_HEIGHT = 280;
+const HERO_HEIGHT = 360;
+const AUTO_SHIFT_MS = 6500;
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<number>);
 
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [jobs, setJobs] = useState<Job[]>(INITIAL_JOBS);
-  const [activeHeroIndex, setActiveHeroIndex] = useState(0);
-  const [isHeroHeld, setIsHeroHeld] = useState(false);
-  const heroListRef = useRef<FlatList<(typeof HERO_IMAGES)[number]>>(null);
+  const [isHoldingHero, setIsHoldingHero] = useState(false);
+  const carouselRef = useRef<FlatList<number>>(null);
+  const activeIndexRef = useRef(0);
+  const scrollX = useRef(new Animated.Value(0)).current;
   const { width } = useWindowDimensions();
 
   const handleRefresh = useCallback(() => {
@@ -60,22 +63,25 @@ export default function HomeScreen() {
   }, []);
 
   const handleSearchSubmit = useCallback((_query: string) => {
-    // Static input handling only for now. API fetch will be connected later.
+    // Static input handling only for now.
   }, []);
 
   useEffect(() => {
-    if (isHeroHeld || HERO_IMAGES.length <= 1) {
+    if (isHoldingHero || HERO_ITEMS.length <= 1) {
       return;
     }
 
-    const intervalId = setInterval(() => {
-      const nextIndex = (activeHeroIndex + 1) % HERO_IMAGES.length;
-      heroListRef.current?.scrollToIndex({ animated: true, index: nextIndex });
-      setActiveHeroIndex(nextIndex);
-    }, HERO_AUTOPLAY_INTERVAL_MS);
+    const timer = setInterval(() => {
+      const nextIndex = (activeIndexRef.current + 1) % HERO_ITEMS.length;
+      carouselRef.current?.scrollToOffset({
+        animated: true,
+        offset: nextIndex * width,
+      });
+      activeIndexRef.current = nextIndex;
+    }, AUTO_SHIFT_MS);
 
-    return () => clearInterval(intervalId);
-  }, [activeHeroIndex, isHeroHeld]);
+    return () => clearInterval(timer);
+  }, [isHoldingHero, width]);
 
   return (
     <SafeAreaView className="flex-1 bg-stone-50" edges={["left", "right", "bottom"]}>
@@ -88,45 +94,77 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="relative">
-          <FlatList
-            data={HERO_IMAGES}
+          <AnimatedFlatList
+            data={HERO_ITEMS}
+            decelerationRate="fast"
             getItemLayout={(_, index) => ({
               index,
               length: width,
               offset: width * index,
             })}
             horizontal
-            keyExtractor={(_, index) => `${index}`}
+            keyExtractor={(_, index) => index.toString()}
             onMomentumScrollEnd={(event) => {
               const nextIndex = Math.round(
                 event.nativeEvent.contentOffset.x / width,
               );
-              setActiveHeroIndex(nextIndex);
+              activeIndexRef.current = nextIndex;
             }}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: true },
+            )}
             pagingEnabled
-            ref={heroListRef}
+            ref={carouselRef}
             renderItem={({ item }) => (
               <Pressable
-                onPressIn={() => setIsHeroHeld(true)}
-                onPressOut={() => setIsHeroHeld(false)}
+                onPressIn={() => setIsHoldingHero(true)}
+                onPressOut={() => setIsHoldingHero(false)}
                 style={{ width }}
               >
-                <Image contentFit="cover" source={item} style={{ height: HERO_HEIGHT, width }} />
+                <View
+                  className="items-center justify-center bg-zinc-900"
+                  style={{ height: HERO_HEIGHT, width }}
+                >
+                  <Image
+                    contentFit="contain"
+                    source={item}
+                    style={{ height: HERO_HEIGHT, width }}
+                  />
+                </View>
               </Pressable>
             )}
             scrollEventThrottle={16}
             showsHorizontalScrollIndicator={false}
+            snapToAlignment="start"
           />
 
           <View className="absolute bottom-4 w-full flex-row items-center justify-center">
-            {HERO_IMAGES.map((_, index) => (
-              <View
-                className={`mx-1 h-2 w-2 rounded-full ${
-                  index === activeHeroIndex ? "bg-white" : "bg-white/50"
-                }`}
-                key={index}
-              />
-            ))}
+            {HERO_ITEMS.map((_, index) => {
+              const inputRange = [
+                (index - 1) * width,
+                index * width,
+                (index + 1) * width,
+              ];
+              const opacity = scrollX.interpolate({
+                inputRange,
+                outputRange: [0.45, 1, 0.45],
+                extrapolate: "clamp",
+              });
+              const scale = scrollX.interpolate({
+                inputRange,
+                outputRange: [1, 1.3, 1],
+                extrapolate: "clamp",
+              });
+
+              return (
+                <Animated.View
+                  className="mx-1 h-2 w-2 rounded-full bg-white"
+                  key={index}
+                  style={{ opacity, transform: [{ scale }] }}
+                />
+              );
+            })}
           </View>
         </View>
 
