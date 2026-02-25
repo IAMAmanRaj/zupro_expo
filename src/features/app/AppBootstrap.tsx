@@ -1,4 +1,6 @@
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
+import { View } from "react-native";
 import HomeScreen from "../home/HomeScreen";
 import SplashScreen from "../splash/SplashScreen";
 
@@ -14,14 +16,22 @@ export default function AppBootstrap() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (isSplashVisible) {
-    return (
-      <SplashScreen
-        isExiting={isSplashExiting}
-        onExitComplete={() => setIsSplashVisible(false)}
-      />
-    );
-  }
-
-  return <HomeScreen />;
+  return (
+    <>
+      <StatusBar style={isSplashVisible ? "light" : "dark"} />
+      {isSplashVisible ? (
+        <View className="flex-1">
+          {isSplashExiting ? <HomeScreen /> : null}
+          <View className="absolute inset-0">
+            <SplashScreen
+              isExiting={isSplashExiting}
+              onExitComplete={() => setIsSplashVisible(false)}
+            />
+          </View>
+        </View>
+      ) : (
+        <HomeScreen />
+      )}
+    </>
+  );
 }

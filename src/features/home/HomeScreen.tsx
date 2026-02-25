@@ -1,8 +1,8 @@
 import { Image } from "expo-image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Animated,
   Alert,
+  Animated,
   FlatList,
   Linking,
   Pressable,
@@ -13,15 +13,9 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Header from "../components/Header";
-import JobCard, { type Job } from "../components/JobCard";
-import { INITIAL_JOBS } from "../constants/jobs";
-
-const HERO_ITEMS = [
-  require("../../../assets/images/Home/hero_gallery/first.png"),
-  require("../../../assets/images/Home/hero_gallery/second.png"),
-  require("../../../assets/images/Home/hero_gallery/third.png"),
-];
+import Header from "../components/Home/Header";
+import JobCard, { type Job } from "../components/Home/JobCard";
+import { HERO_ITEMS, INITIAL_JOBS } from "../constants/home/constants";
 
 const HERO_HEIGHT = 360;
 const AUTO_SHIFT_MS = 6500;
