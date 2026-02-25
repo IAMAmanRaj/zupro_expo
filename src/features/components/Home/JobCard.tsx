@@ -68,7 +68,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
       onTouchEnd={card.pressOut}
       onTouchCancel={card.pressOut}
     >
-      <View className="rounded-3xl border border-gray-200 bg-white overflow-hidden">
+      <View className="rounded-3xl border bg-blue-100 border-gray-700 overflow-hidden">
 
         {/* ── Header ───────────────────────────────────── */}
         <View className="px-5 pt-5 pb-4">
@@ -82,7 +82,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
           </Text>
 
           {/* Location badge: capped at 80% width, truncates cleanly */}
-          <View className="mt-3 flex-row items-center self-start max-w-[80%] rounded-full bg-blue-50 border border-blue-100 px-3 py-1.5">
+          <View className="mt-3 flex-row items-center self-start max-w-[80%] rounded-full bg-blue-50 border border-blue-400 px-3 py-1.5">
             <Ionicons color="#2563eb" name="location-sharp" size={14} />
             <Text
               className="ml-1.5 text-sm font-semibold text-blue-700 flex-shrink"
@@ -167,7 +167,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
                 className="h-12 flex-row items-center justify-center gap-1.5 rounded-2xl border border-gray-200 bg-white"
               >
                 <Ionicons color="#9ca3af" name="close-circle-outline" size={18} />
-                <Text className="text-sm font-semibold text-gray-500">Skip</Text>
+                <Text className="text-lg font-semibold text-gray-500">Skip</Text>
               </Pressable>
             </Animated.View>
 
@@ -182,7 +182,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
                 className="h-12 flex-row items-center justify-center gap-2 rounded-2xl bg-blue-600"
               >
                 <Ionicons color="#ffffff" name="send" size={16} />
-                <Text className="text-base font-bold text-white">Apply now</Text>
+                <Text className="text-lg font-bold text-white">Apply now</Text>
               </Pressable>
             </Animated.View>
           </View>

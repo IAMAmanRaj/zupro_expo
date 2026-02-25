@@ -133,7 +133,7 @@ export default function HomeScreen() {
   }, [isHoldingHero, width]);
 
   return (
-    <SafeAreaView className="flex-1 bg-stone-50" edges={["left", "right", "bottom"]}>
+    <SafeAreaView className="flex-1" edges={["left", "right", "bottom"]}>
       <ScrollView
         className="flex-1"
         contentContainerClassName="pb-10"
