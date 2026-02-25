@@ -15,7 +15,7 @@ import { SPLASH_IMAGE } from "../constants/splash/constants";
 const ANIMATION = {
   badgeTopOffset: 8,
   exitTranslateX: -420,
-  exitDurationMs: 420,
+  exitDurationMs: 620,
   exitFadeTo: 0,
   overlayOpacity: 0.2,
 } as const;
@@ -79,7 +79,7 @@ export default function SplashScreen({
       />
 
       <SafeAreaView className="flex-1 px-6" edges={["top"]}>
-        <View style={{ marginTop: insets.top + ANIMATION.badgeTopOffset }}>
+        <View className="mt-8 ">
           <View
             className="flex-row items-center self-center rounded-full border border-zinc-700/70 bg-zinc-950/60 px-5 py-3"
           >

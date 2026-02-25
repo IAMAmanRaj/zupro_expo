@@ -18,7 +18,7 @@ export default function AppBootstrap() {
 
   return (
     <>
-      <StatusBar style={isSplashVisible ? "light" : "dark"} />
+     
       {isSplashVisible ? (
         <View className="flex-1">
           {isSplashExiting ? <HomeScreen /> : null}
