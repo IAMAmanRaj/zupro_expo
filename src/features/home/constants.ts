@@ -1,7 +1,7 @@
 export const HERO_ITEMS = [
-  require("../../../../assets/images/Home/hero_gallery/first.png"),
-  require("../../../../assets/images/Home/hero_gallery/second.png"),
-  require("../../../../assets/images/Home/hero_gallery/third.png"),
+  require("../../../assets/images/Home/hero_gallery/first.png"),
+  require("../../../assets/images/Home/hero_gallery/second.png"),
+  require("../../../assets/images/Home/hero_gallery/third.png"),
 ];
 
 import { type Job } from "./components/JobCard";
