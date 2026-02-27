@@ -136,7 +136,6 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1" edges={["left", "right", "bottom"]}>
       <ScrollView
         className="flex-1"
-        contentContainerClassName="pb-10"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
@@ -184,13 +183,13 @@ export default function HomeScreen() {
                 style={{ width }}
               >
                 <View
-                  className="items-center justify-center bg-zinc-900"
-                  style={{ height: HERO_HEIGHT, width }}
-                >
-                  <Image
+  className="relative"
+  style={{ height: HERO_HEIGHT, width }}
+>
+<Image
   source={item}
-  contentFit="contain"
-  transition={0}          
+  contentFit="cover"
+  transition={0}
   cachePolicy="memory-disk"
   priority="high"
   style={{ height: HERO_HEIGHT, width }}
@@ -203,7 +202,7 @@ export default function HomeScreen() {
             snapToAlignment="start"
           />
 
-          <View className="absolute bottom-4 w-full flex-row items-center justify-center">
+          <View className="absolute bottom-4 w-full flex-row items-center  justify-center">
             {HERO_ITEMS.map((_, index) => {
               const inputRange = [
                 (index - 1) * width,
@@ -215,17 +214,17 @@ export default function HomeScreen() {
                 outputRange: [0.45, 1, 0.45],
                 extrapolate: "clamp",
               });
-              const scale = scrollX.interpolate({
+              const scaleX = scrollX.interpolate({
                 inputRange,
-                outputRange: [1, 1.3, 1],
+                outputRange: [1, 2, 1], // stretches horizontally
                 extrapolate: "clamp",
               });
 
               return (
                 <Animated.View
-                  className="mx-1 h-2 w-2 rounded-full bg-white"
+                  className="mx-1 h-1 w-3 rounded-3xl bg-white"
                   key={index}
-                  style={{ opacity, transform: [{ scale }] }}
+                  style={{ opacity, transform: [{ scaleX }] }}
                 />
               );
             })}
