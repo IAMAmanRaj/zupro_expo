@@ -23,7 +23,8 @@ import { HERO_ITEMS, INITIAL_JOBS } from "./constants";
 
 const HERO_HEIGHT = 360;
 const AUTO_SHIFT_MS = 4500;
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<number>);
+type HeroItem = (typeof HERO_ITEMS)[number];
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<HeroItem>);
 const REFRESH_DELAY_MS = 900;
 
 function buildJobsFeed(): Job[] {
@@ -35,7 +36,7 @@ export default function HomeScreen() {
   const [isFeedReloading, setIsFeedReloading] = useState(false);
   const [jobs, setJobs] = useState<Job[]>(() => buildJobsFeed());
   const [isHoldingHero, setIsHoldingHero] = useState(false);
-  const carouselRef = useRef<FlatList<number>>(null);
+  const carouselRef = useRef<FlatList<HeroItem>>(null);
   const activeIndexRef = useRef(0);
   const currentOffsetRef = useRef(0);
   const isAutoAnimatingRef = useRef(false);
@@ -183,17 +184,19 @@ export default function HomeScreen() {
                 style={{ width }}
               >
                 <View
-  className="relative"
-  style={{ height: HERO_HEIGHT, width }}
->
-<Image
-  source={item}
-  contentFit="cover"
-  transition={0}
-  cachePolicy="memory-disk"
-  priority="high"
-  style={{ height: HERO_HEIGHT, width }}
-/>
+                  className="relative overflow-hidden"
+                  style={{ height: HERO_HEIGHT, width }}
+                >
+                  <Image
+                    source={item.source}
+                    placeholder={item.preview}
+                    placeholderContentFit="cover"
+                    contentFit="cover"
+                    transition={400}
+                    cachePolicy="memory-disk"
+                    priority="high"
+                    style={{ height: HERO_HEIGHT, width }}
+                  />
                 </View>
               </Pressable>
             )}

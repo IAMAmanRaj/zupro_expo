@@ -1,8 +1,17 @@
-export const HERO_ITEMS = [
-  require("../../../assets/images/Home/hero_gallery/first.png"),
-  require("../../../assets/images/Home/hero_gallery/second.png"),
-  require("../../../assets/images/Home/hero_gallery/third.png"),
+const BLUR_PLACEHOLDER = {
+  uri: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+};
+
+const heroModules = [
+  require("../../../assets/images/Home/hero_gallery/first.webp"),
+  require("../../../assets/images/Home/hero_gallery/second.webp"),
+  require("../../../assets/images/Home/hero_gallery/third.webp"),
 ];
+
+export const HERO_ITEMS = heroModules.map((module) => ({
+  source: module,
+  preview: BLUR_PLACEHOLDER,
+}));
 
 import { type Job } from "./components/JobCard";
 
