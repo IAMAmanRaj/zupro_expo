@@ -83,7 +83,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
 
           <View className="mt-3 flex-row items-center justify-between gap-2">
             {/* Location badge: capped width, truncates cleanly */}
-            <View className="flex-row items-center max-w-[55%] rounded-full bg-blue-50 border border-blue-400 px-3 py-1.5">
+            <View className="flex-row items-center max-w-[55%] rounded-full bg-blue-50 border border-blue-400 px-3 py-2.5">
               <Ionicons color="#2563eb" name="location-sharp" size={14} />
               <Text
                 className="ml-1.5 text-md font-semibold text-blue-700 flex-shrink"
@@ -168,7 +168,7 @@ export default function JobCard({ job, onApply, onNotInterested, onOpenLocation 
                 accessibilityLabel={`Not interested in ${job.title}`}
                 className="h-12 flex-row items-center justify-center gap-1.5 rounded-2xl border border-gray-500 bg-gray-100"
               >
-                <Ionicons color="#000000" name="close-circle-outline" size={18} />
+                <Ionicons color="#000000" name="close-circle-outline" size={20} />
                 <Text className="text-lg font-semibold text-black">Skip</Text>
               </Pressable>
             </Animated.View>
