@@ -1,12 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Easing,
+  Keyboard,
   Modal,
+  Platform,
   Pressable,
   Text,
   TextInput,
+  UIManager,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 type HeaderProps = {
@@ -59,10 +64,22 @@ function useSpring(to = 0.95) {
   return { anim, inn, out };
 }
 
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const SEARCH_BUTTON_WIDTH = 88;
+const ANIM_DURATION = 320;
+
 export default function Header({ defaultLocation, onRefresh, onSearchSubmit }: HeaderProps) {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchValue, setSearchValue] = useState(defaultLocation);
   const [infoVisible, setInfoVisible] = useState(false);
+  const { width } = useWindowDimensions();
+  const searchWidth = useRef(new Animated.Value(SEARCH_BUTTON_WIDTH)).current;
+  const searchOpacity = useRef(new Animated.Value(0)).current;
+  const headerOpacity = useRef(new Animated.Value(1)).current;
+  const searchInputRef = useRef<TextInput>(null);
 
   const infoBtn = useSpring(0.88);
   const closeBtn = useSpring(0.9);
@@ -86,38 +103,79 @@ export default function Header({ defaultLocation, onRefresh, onSearchSubmit }: H
 
   const handleSubmit = () => onSearchSubmit(searchValue.trim());
 
+  const closeSearch = () => {
+    searchInputRef.current?.blur();
+    Keyboard.dismiss();
+    // Brief defer so keyboard layout shift doesn't interrupt the collapse animation
+    setTimeout(() => setIsSearchExpanded(false), 16);
+  };
+
+  useEffect(() => {
+    if (isSearchExpanded) {
+      searchInputRef.current?.focus();
+    }
+  }, [isSearchExpanded]);
+
+  useEffect(() => {
+    const expandedWidth = width - 40; // px-5 = 20*2
+    const easing = Easing.bezier(0.4, 0, 0.2, 1); // Material Design standard easing
+    if (isSearchExpanded) {
+      Animated.parallel([
+        Animated.timing(searchWidth, {
+          toValue: expandedWidth,
+          duration: ANIM_DURATION,
+          easing,
+          useNativeDriver: false,
+        }),
+        Animated.timing(searchOpacity, {
+          toValue: 1,
+          duration: ANIM_DURATION,
+          easing,
+          useNativeDriver: false,
+        }),
+        Animated.timing(headerOpacity, {
+          toValue: 0,
+          duration: ANIM_DURATION,
+          easing,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(searchWidth, {
+          toValue: SEARCH_BUTTON_WIDTH,
+          duration: ANIM_DURATION,
+          easing,
+          useNativeDriver: false,
+        }),
+        Animated.timing(searchOpacity, {
+          toValue: 0,
+          duration: ANIM_DURATION,
+          easing,
+          useNativeDriver: false,
+        }),
+        Animated.timing(headerOpacity, {
+          toValue: 1,
+          duration: ANIM_DURATION,
+          easing,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  }, [isSearchExpanded, width]);
+
   return (
     <>
       <View className="px-5 pb-4 pt-4">
-        {isSearchExpanded ? (
-          <View className="w-full flex-row items-center rounded-2xl border border-zinc-300 bg-white px-3">
-            <Ionicons color="#3f3f46" name="search-outline" size={18} />
-            <TextInput
-              className="h-12 flex-1 px-2 text-base text-zinc-900"
-              onChangeText={setSearchValue}
-              onSubmitEditing={handleSubmit}
-              placeholder="Search by area or city"
-              placeholderTextColor="#71717a"
-              returnKeyType="search"
-              value={searchValue}
-              autoFocus
-            />
-            <Pressable
-              accessibilityLabel="Close search"
-              accessibilityRole="button"
-              className="h-9 w-9 items-center justify-center rounded-full bg-zinc-100"
-              onPress={() => setIsSearchExpanded(false)}
-            >
-              <Ionicons color="#3f3f46" name="close-outline" size={18} />
-            </Pressable>
-          </View>
-        ) : (
-          <View className="flex-row items-center justify-between">
-            {/* Left: title + info button */}
+        <View className="relative min-h-12">
+          {/* Header row - fades when search expanded */}
+          <Animated.View
+            className="absolute inset-0 flex-row items-center justify-between"
+            pointerEvents={isSearchExpanded ? "none" : "auto"}
+            style={{ opacity: headerOpacity }}
+          >
             <View className="flex-row items-center gap-2">
               <Text className="text-xl font-semibold text-zinc-900">Jobs near you</Text>
-
-              {/* ⓘ button */}
               <Animated.View className="mt-1" style={{ transform: [{ scale: infoBtn.anim }] }}>
                 <Pressable
                   accessibilityLabel="How Zupro works"
@@ -125,14 +183,12 @@ export default function Header({ defaultLocation, onRefresh, onSearchSubmit }: H
                   onPressIn={infoBtn.inn}
                   onPressOut={infoBtn.out}
                   onPress={openModal}
-                  className="h-6 w-6 items-center justify-center  rounded-full bg-blue-500 border border-blue-200"
+                  className="h-6 w-6 items-center justify-center rounded-full border border-blue-200 bg-blue-500"
                 >
-                  <Ionicons color="#ffffff" name="information"  size={13} />
+                  <Ionicons color="#ffffff" name="information" size={13} />
                 </Pressable>
               </Animated.View>
             </View>
-
-            {/* Right: refresh + search */}
             <View className="flex-row items-center gap-2">
               <Pressable
                 accessibilityLabel="Refresh jobs"
@@ -145,15 +201,42 @@ export default function Header({ defaultLocation, onRefresh, onSearchSubmit }: H
               <Pressable
                 accessibilityLabel="Open search"
                 accessibilityRole="button"
-                className="h-10 flex-row items-center rounded-xl border border-zinc-200 bg-white px-3 gap-1.5"
+                className="h-10 flex-row items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3"
                 onPress={() => setIsSearchExpanded(true)}
               >
                 <Ionicons color="#27272a" name="search-outline" size={16} />
                 <Text className="text-sm font-semibold text-zinc-800">Search</Text>
               </Pressable>
             </View>
-          </View>
-        )}
+          </Animated.View>
+
+          {/* Search bar - grows from right when expanded */}
+          <Animated.View
+            className="absolute right-0 top-0 flex-row items-center overflow-hidden rounded-2xl border border-zinc-300 bg-white px-3"
+            pointerEvents={isSearchExpanded ? "auto" : "none"}
+            style={{ width: searchWidth, height: 48, opacity: searchOpacity }}
+          >
+            <Ionicons color="#3f3f46" name="search-outline" size={18} />
+            <TextInput
+              ref={searchInputRef}
+              className="h-12 flex-1 px-2 text-base text-zinc-900"
+              onChangeText={setSearchValue}
+              onSubmitEditing={handleSubmit}
+              placeholder="Search by area or city"
+              placeholderTextColor="#71717a"
+              returnKeyType="search"
+              value={searchValue}
+            />
+            <Pressable
+              accessibilityLabel="Close search"
+              accessibilityRole="button"
+              className="h-9 w-9 items-center justify-center rounded-full bg-zinc-100"
+              onPress={closeSearch}
+            >
+              <Ionicons color="#3f3f46" name="close-outline" size={18} />
+            </Pressable>
+          </Animated.View>
+        </View>
       </View>
 
       {/* ── Info modal ─────────────────────────────────── */}

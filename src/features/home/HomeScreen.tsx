@@ -235,7 +235,7 @@ export default function HomeScreen() {
         </View>
 
         <Header
-          defaultLocation="Mumbai, Maharashtra"
+          defaultLocation=""
           onRefresh={handleRefresh}
           onSearchSubmit={handleSearchSubmit}
         />
